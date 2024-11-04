@@ -2,10 +2,32 @@ import requests
 import pandas as pd
 from ff_data import cookies
 import ff_data
+import os
 
 
+def scraper(id, kind = "Draft", year = 2024, week = 0):
+        """
+        This function determines which api calls to make and exports the results in one csv named accordingly
 
-def scraper(kind = "Draft", id = 135604446, year = 2024, week = 0):
+        id (int): id of the league for requests specific to a league
+        kind (str): What type of data is to be retreived
+        year (int): year of interest for the request
+        week (int): week of interest for the request (0 if the request is yearly)
+
+        Prints:
+        str: confirming the output name and location
+        """
+        
+
+        # Get the directory of the current script
+        output_file_name = "ff_output"
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+
+        # Define the name of the subfolder where you want to save the file
+        output_folder = os.path.join(current_directory, output_file_name)
+
+        # Create the output folder if it doesn't exist
+        os.makedirs(output_folder, exist_ok=True)
 
         match kind:
                 case "Draft":
@@ -20,7 +42,7 @@ def scraper(kind = "Draft", id = 135604446, year = 2024, week = 0):
                         final_df = final_df.replace({"team_id": ff_data.team_mapping})
 
                         file_name = f"draft_{year}"
-                        final_df.to_csv(f'{file_name}.csv', index=False)
+                        final_df.to_csv(os.path.join(output_folder, f'{file_name}.csv'), index=False)
 
 
                 case "Weekly Matchup":
@@ -29,13 +51,13 @@ def scraper(kind = "Draft", id = 135604446, year = 2024, week = 0):
 
                         if week == 0:
                                 file_name = f"matchup_{year}"
-                                getplmatchup_df.to_csv(f'{file_name}.csv', index=False)
+                                getplmatchup_df.to_csv(os.path.join(output_folder, f'{file_name}.csv'), index=False)
                         else:
                                 file_name = f"matchup_{year}_{week}"
-                                getplmatchup_df.to_csv(f'{file_name}.csv', index=False)
+                                getplmatchup_df.to_csv(os.path.join(output_folder, f'{file_name}.csv'), index=False)
 
 
-        print(f"Data has been written to {file_name}")
+        print(f"Data has been written to {file_name} in {output_file_name}")
                 
 
 
@@ -168,6 +190,6 @@ def getplmatchup(id, year, week = 0):
                 results = pd.concat(result, axis=0, ignore_index=True)
                 return results
 
-scraper("Draft", 135604446, 2022)
-
-scraper("Weekly Matchup", 135604446, 2022)
+# Example calls :
+# scraper("Draft", 26554663, 2024)
+# scraper("Weekly Matchup", 2164657, 2024)
